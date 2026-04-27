@@ -1,0 +1,43 @@
+---
+obsidianUIMode: preview
+cssclasses:
+- json5e-note
+- json5e-index
+---
+# Index of Giant
+
+- [Cloud Giant](./cloud-giant-xmm.md)
+- [Cloud Giant Smiling One](./cloud-giant-smiling-one-mpmm.md)
+- [Cyclops Oracle](./cyclops-oracle-xmm.md)
+- [Cyclops Sentry](./cyclops-sentry-xmm.md)
+- [Deadstone Cleft Stone Giant](./deadstone-cleft-stone-giant-skt.md)
+- [Dire Troll](./dire-troll-mpmm.md)
+- [Ettin](./ettin-xmm.md)
+- [Fire Giant](./fire-giant-xmm.md)
+- [Fire Giant Dreadnought](./fire-giant-dreadnought-mpmm.md)
+- [Fomorian](./fomorian-xmm.md)
+- [Frost Giant](./frost-giant-xmm.md)
+- [Frost Giant Everlasting One](./frost-giant-everlasting-one-mpmm.md)
+- [Hill Giant](./hill-giant-xmm.md)
+- [Ice Troll](./ice-troll-idrotf.md)
+- [Mouth of Grolantor](./mouth-of-grolantor-mpmm.md)
+- [Ogre](./ogre-xmm.md)
+- [Ogre Battering Ram](./ogre-battering-ram-mpmm.md)
+- [Ogre Bolt Launcher](./ogre-bolt-launcher-mpmm.md)
+- [Ogre Chain Brute](./ogre-chain-brute-mpmm.md)
+- [Ogre Goblin Hucker](./ogre-goblin-hucker-skt.md)
+- [Ogre Howdah](./ogre-howdah-mpmm.md)
+- [Ogrillon Ogre](./ogrillon-ogre-xmm.md)
+- [Rot Troll](./rot-troll-mpmm.md)
+- [Spirit Troll](./spirit-troll-mpmm.md)
+- [Stone Giant](./stone-giant-xmm.md)
+- [Stone Giant Dreamwalker](./stone-giant-dreamwalker-mpmm.md)
+- [Storm Giant](./storm-giant-xmm.md)
+- [Storm Giant Quintessent](./storm-giant-quintessent-mpmm.md)
+- [The Bagman](./the-bagman-vrgr.md)
+- [Troll](./troll-xmm.md)
+- [Troll Limb](./troll-limb-xmm.md)
+- [Venom Troll](./venom-troll-mpmm.md)
+- [Verbeeg Longstrider](./verbeeg-longstrider-idrotf.md)
+- [Verbeeg Marauder](./verbeeg-marauder-idrotf.md)
+- [Young Cloud Giant](./young-cloud-giant-skt.md)
