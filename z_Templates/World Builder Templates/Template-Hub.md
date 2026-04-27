@@ -1,91 +1,61 @@
 ---
 tags:
   - Category/Hub
-container: Test
-MyContainer: "[[Jungle of Screams|Jungle of Screams]]"
-MyCategory: Hamlet <80
+MyContainer: []
+MyCategory:
 obsidianUIMode: preview
+hubType: Town
+hubPopulation:
+hubLeader:
+hubFaction:
 ---
 <%*
-/* 1) “NewHub” title logic */
-const hasTitle = !tp.file.title.startsWith("NewHub");
-let title;
-if (!hasTitle) {
-  title = await tp.system.prompt("Enter Hub Name");
-  await tp.file.rename(title);
-} else {
-  title = tp.file.title;
-}
-
-/* 2) Gather all region files under 2-World/Regions */
-const regionFiles = tp.app.vault.getMarkdownFiles()
-  .filter(f => f.path.startsWith("2-World/Regions/"));
-
-/* 3) Suggester for picking the container note */
-const regionChoices = regionFiles.map(f => f.basename);
-const regionValues  = regionFiles.map(f => f.path);
-const chosenPath   = await tp.system.suggester(regionChoices, regionValues, true);
-if (!chosenPath) return;  // cancelled
-
-/* 4) Build the wiki-link syntax */
-const chosenAlias = chosenPath.split("/").pop().replace(/\.md$/, "");
-const wikiLink    = `[[${chosenPath}|${chosenAlias}]]`;
-
-/* 5) Prompt for Hub type (MyCategory) */
-const categoryOptions = [
-  "City +1500",
-  "Town +200",
-  "Village +80",
-  "Hamlet <80",
-  "Encampment",
-  "Keep",
-  "Fortress",
-  "Stronghold"
-];
-const chosenCat = await tp.system.suggester(categoryOptions, categoryOptions, true);
-if (!chosenCat) return;  // cancelled
-
-/* 6) Delay slightly, then write both properties into frontmatter */
+const hubName = await tp.system.prompt("Enter Hub Name", tp.file.title);
+if (!hubName) return;
+await tp.file.rename(hubName);
+const regionFiles = tp.app.vault.getMarkdownFiles().filter(f => f.path.startsWith("2-World/Regions/"));
+const choices = regionFiles.map(f => f.basename);
+const values = regionFiles.map(f => f.path);
+const chosenPath = await tp.system.suggester(choices, values, true);
+if (!chosenPath) return;
+const alias = chosenPath.split("/").pop().replace(/\.md$/, "");
+const wikiLink = `[[${chosenPath}|${alias}]]`;
+const typeOpts = ["City","Town","Village","Hamlet","Encampment","Keep","Fortress","Stronghold","Other"];
+const chosenType = await tp.system.suggester(typeOpts, typeOpts, true);
 setTimeout(() => {
-  const newFile = tp.file.find_tfile(tp.file.path(true));
-  if (!newFile) return;
-  app.fileManager.processFrontMatter(newFile, fm => {
+  const f = tp.file.find_tfile(tp.file.path(true));
+  if (!f) return;
+  app.fileManager.processFrontMatter(f, fm => {
     fm["MyContainer"] = wikiLink;
-    fm["MyCategory"]  = chosenCat;
+    if (chosenType) fm["hubType"] = chosenType;
   });
-}, 50);
-%>
+}, 100);
+-%>
 
-
-> [!NOTE|div-m] Parent Region: `INPUT[suggester(optionQuery(#Category/Region)):MyContainer]`
+> [!NOTE] Parent Region: `INPUT[inlineListSuggester(optionQuery(#Category/Region)):MyContainer]`
 
 > [!column|no-i no-t]
 >> [!info|no-title] Map
->> ```leaflet  
->> id: ZalkorsFerry ### Must be unique with no spaces  
->> image: [[Zelkor's Ferry.png]] ### Link to the map image file. Do not add a ! in front of the image  
->> bounds: [[0,0], [5000, 4025]] ### Size of the map in px Height_y, Width_x. Ignore 0,0  
->> height: 500px ### Size of the leaflet embed in px on your screen  
->> width: 95% ### Size of the leaflet embed in your note  
->> lat: 2500 ### To center the map, make this half of the map height.  
->> long: 2012.5 ### To center the map, make this half of the map width.  
->> minZoom: -3 ### Controls how far away from the map you can zoom out. Hover over the target icon to see the current level.  
->> maxZoom: 1 ### Controls how far towards the map you can zoom in. Hover over the target icon to see the current level.  
->> defaultZoom: -3 ### Sets the default zoom level when the map loads. Hover over the target icon to see the current level.  
->> zoomDelta: 0.5 ### Adjust how much the zoom changes when you zoom in or out.  
->> unit: mi ### The value displayed when measuring so you know what type of unit is being measure.  
->> scale: 0.09328358208955223 ### Real units/px (resolution) of your map  
->> recenter: false  
->> darkmode: false ### marker
+>> ```leaflet
+>> id: <% tp.file.title.replace(/ /g,"-") %>-hub-map
+>> image: [[hub-placeholder.png]]
+>> bounds: [[0,0], [2000, 2000]]
+>> height: 450px
+>> width: 95%
+>> lat: 1000
+>> long: 1000
+>> minZoom: -3
+>> maxZoom: 1
+>> defaultZoom: -2
+>> darkmode: false
 >> ```
 >
->> [!note|no-title] Town Name
+>> [!note|no-title] Hub Details
 >> ~~~meta-bind
 >> INPUT[select(
->> option(1, ℹ️General),
->> option(2, 🏃‍♂️‍➡️NPCs),
->> option(3, 📝GM Notes),
->> option(4, 🐎Travel),
+>> option(1, General),
+>> option(2, Districts),
+>> option(3, GM Notes),
 >> class(tabbed)
 >> )]
 >> ~~~
@@ -94,243 +64,97 @@ setTimeout(() => {
 >>> > ![[#General|no-h clean]]
 >>>
 >>> >[!div-m|no-title]
->>> > ![[#NPCs|no-h clean]]
+>>> > ![[#Districts|no-h clean]]
 >>>
->>> > [!div-m|no-title]
+>>> >[!div-m|no-title]
 >>> > ![[#GM Notes|no-h clean]]
->>> 
->>> > [!div-m|no-title]
->>> > ![[#Travel|no-h clean]]
->>> 
 
 > [!NOTE|no-title]
 > ~~~meta-bind
 > INPUT[select(
-> option(1, 🛒Commerce),
-> option(2, 🍎Agriculture),
-> option(3, ⚔️Military),
-> option(4, 💭Philosophy),
-> option(5, ⚙️Industrial),
-> option(6, 🏠Nesting),
-> option(7, 👑Government),
+> option(1, Places),
+> option(2, People),
+> option(3, Groups),
+> option(4, Quests),
 > class(tabbed)
 > )]
 > ~~~
-> >[!tabbed-box-maxh]
-> > >[!div-m|no-title]
-> > > ![[#Commerce|no-h clean]]
-> >
-> > > [!div-m|no-title]
-> > > ![[#Agriculture|no-h2 clean]]
-> > 
-> > > [!div-m|no-title]
-> > > ![[#Military|no-h clean]]
-> > 
-> > > [!div-m|no-title]
-> > > ![[#Philosophy|no-h clean]]
-> > 
-> > > [!div-m|no-title]
-> > > ![[#Industrial|no-h clean]]
-> > 
-> > > [!div-m|no-title]
-> > > ![[#Nesting|no-h clean]]
-> > 
-> > > [!div-m|no-title]
-> > > ![[#Government|no-h clean]]
+>>[!tabbed-box-maxh]
+>>>[!div-m|no-title]
+>>> ![[#Places|no-h clean]]
+>>
+>>> [!div-m|no-title]
+>>> ![[#People|no-h clean]]
+>>
+>>> [!div-m|no-title]
+>>> ![[#Groups|no-h clean]]
+>>
+>>> [!div-m|no-title]
+>>> ![[#Quests|no-h clean]]
 
 ---
 # General
 
-Select Settlement: `INPUT[suggester(optionQuery(#Category/Region)):MyContainer]`
+Type: `INPUT[inlineSelect(option(City), option(Town), option(Village), option(Hamlet), option(Encampment), option(Keep), option(Fortress), option(Stronghold), option(Other)):hubType]`
 
-Select Category: `INPUT[inlineSelect(option(City +1500), option(Town +200), option(Village +80), option(Hamlet <80), option(Encampment), option(Keep), option(Fortress), option(Stronghold)):MyCategory]`
+Population: `INPUT[number:hubPopulation]`
 
-This is the town description. 
+Leader: `INPUT[suggester(optionQuery(#Category/People)):hubLeader]`
 
-# NPCs
+Dominant Faction: `INPUT[suggester(optionQuery(#Category/Group)):hubFaction]`
 
-`BUTTON[button_person]` List important NPCs here. 
+Description of this hub.
 
-```dataviewjs
-// 1) Hub’s vault-relative path
-const hubPath = dv.current().file.path;
+# Districts
 
-// 2) Helper to extract the path from a "[[path|alias]]" entry
-function extractPaths(mc) {
-  if (!mc) return [];
-  const arr = Array.isArray(mc) ? mc : [mc];
-  return arr
-    .map(link => {
-      const m = String(link).match(/\[\[(.*?)\|/);
-      return m ? m[1] : null;
-    })
-    .filter(Boolean);
-}
-
-// 3) Find all Places whose MyContainer points to this Hub
-const placePages = dv.pages(`"2-World/Places"`)
-  .where(p => extractPaths(p.MyContainer).includes(hubPath))
-  .values;
-// collect their **paths**
-const placePaths = placePages.map(p => p.file.path);
-
-// 4a) Indirect People: whose MyContainer links to any of those placePaths
-const indirect = dv.pages(`"2-World/People"`)
-  .where(p => {
-    const paths = extractPaths(p.MyContainer);
-    return paths.some(path => placePaths.includes(path));
-  })
-  .values;
-
-// 4b) Direct People: whose MyContainer links **directly** to this Hub
-const direct = dv.pages(`"2-World/People"`)
-  .where(p => extractPaths(p.MyContainer).includes(hubPath))
-  .values;
-
-// 5) Merge & dedupe by file path
-const allPeople = [...indirect, ...direct];
-const unique = Array.from(
-  new Map(allPeople.map(p => [p.file.path, p])).values()
-);
-
-// 6) Build rows (Name clickable, Race, Gender, Associated Group)
-const rows = unique.map(p => {
-  const linkEl = dv.el("a", p.file.name, {
-    href: "#",
-    cls: "dataview-link",
-  });
-  linkEl.addEventListener("click", e => {
-    e.preventDefault();
-    app.workspace.openLinkText(p.file.path, dv.current().file.path);
-  });
-
-  const race = p.char_race ?? "";
-  const gender = p.char_gender ?? "";
-  let groups = p.Connected_Groups ?? [];
-  if (!Array.isArray(groups)) groups = [groups];
-  const assoc = groups.join(", ");
-
-  return [linkEl, race, gender, assoc];
-});
-
-// 7) Render the table
-dv.table(
-  ["Name", "Race", "Gender", "Associated Group"],
-  rows
-);
-```
+| District | Type | Notes |
+|----------|------|-------|
+| - | - | - |
 
 # GM Notes
 
-Make notes of what you need to track in the town here. 
+Secrets, rumors, plot hooks tied to this hub.
 
-# Travel
+# Places
 
-%% For every other hub/location that you would like to see travel time to, add a line in the table and replicate the format provided. Change the Town name and link it to that towns note and then change the 88 in the formula to match the distance in miles to that place. Use a Leaflet map to measure the distance. %%
-
-`VIEW[{Travel Calculator#HoursPerDay}][math]` hrs per day
-[[Travel Calculator]]  / [[Exhaustion]] Level: `VIEW[{Travel Calculator#ExhaustionLevel}][math]`
-
-| Destination |  Travel Days  |
-| ---|---|
-| [[Next Town A]] | 🕓: `VIEW[round((88* {Travel Calculator#TravelCalc}) / 60 / {Travel Calculator#HoursPerDay}, 1)]`      |
-| [[Next Town B ]] | 🕓: `VIEW[round((88* {Travel Calculator#TravelCalc}) / 60 / {Travel Calculator#HoursPerDay}, 1)]`
-
-# CAMPING 
-
-C - Commerce (Economics and Entertainment) - Shops, Malls, Theatres, Markets, Carnivals, Electronics
-A - Agriculture (Resource Production and Collection) - Farms, Mines, Fisheries, Lumber Yards, Oil Rigs, Power Plants
-M - Military (Protection and Transportation) - Forts, Bases, Armories, Walls, Seaports, Airports, Spaceports
-P - Philosophy (Religion and Education) - Houses of Worship, Schools, Universities, Laboratories, Arboretums
-I - Industrial (Resource Utilization and Processing) - Factories, Metalworks, Bakeries, Artisans, Jewelers
-N - Nesting (Housing and Civil Engineering) - Residential Areas, Inns/Hotels
-G - Government (Legislation and Judicial) - Town Halls, Courthouses, Tourist Stops, Monuments/Landmarks
-
-## Commerce
-
-This is the content
-
-`BUTTON[button_place]` `BUTTON[button_person]` **C - Commerce** (Economics and Entertainment) - Shops, Malls, Theatres, Markets, Carnivals, Electronics
+`BUTTON[button_place]`
 
 ```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
+TABLE WITHOUT ID link(file.name) AS "Place", MyCategory AS "Type"
 FROM "2-World/Places"
 WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Commerce"
 SORT file.name ASC
 ```
 
-## Agriculture
+# People
 
-`BUTTON[button_place]` `BUTTON[button_person]` **A - Agriculture** (Resource Production and Collection) - Farms, Mines, Fisheries, Lumber Yards, Oil Rigs, Power Plants
+`BUTTON[button_person]`
 
 ```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
+TABLE WITHOUT ID link(file.name) AS "Name", char_race AS "Race", char_gender AS "Gender", char_status AS "Status"
+FROM "2-World/People"
 WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Agriculture"
 SORT file.name ASC
 ```
 
-## Military
+# Groups
 
-`BUTTON[button_place]` `BUTTON[button_person]` **M - Military** (Protection and Transportation) - Forts, Bases, Armories, Walls, Seaports, Airports, Spaceports
+`BUTTON[button_group]`
 
 ```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
+TABLE WITHOUT ID link(file.name) AS "Group", MyCategory AS "Type"
+FROM "2-World/Groups"
 WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Military"
 SORT file.name ASC
 ```
 
+# Quests
 
-## Philosophy
-
-`BUTTON[button_place]` `BUTTON[button_person]` **P - Philosophy** (Religion and Education) - Houses of Worship, Schools, Universities, Laboratories, Arboretums
-
-```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
-WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Philosophy"
-SORT file.name ASC
-```
-
-## Industrial
-
-`BUTTON[button_place]` `BUTTON[button_person]` **I - Industrial** (Resource Utilization and Processing) - Factories, Metalworks, Bakeries, Artisans, Jewelers
+`BUTTON[button_quest]`
 
 ```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
+TABLE WITHOUT ID link(file.name) AS "Quest", questStatus AS "Status", questGiver AS "Quest Giver"
+FROM "2-World/Quests"
 WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Industrial"
 SORT file.name ASC
 ```
-
-## Nesting
-
-`BUTTON[button_place]` `BUTTON[button_person]` **N - Nesting** (Housing and Civil Engineering) - Residential Areas, Bridges, Parks, Inns/Hotels
-
-```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
-WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Nesting"
-SORT file.name ASC
-```
-
-## Government
-
-`BUTTON[button_place]` `BUTTON[button_person]` **G - Government** (Legislation and Judicial) - Town Halls, Courthouses, Tourist Stops, Monuments/Landmarks
-
-```dataview
-TABLE WITHOUT ID link(file.name) AS "Place(s)", MyCategory AS "Type"
-FROM "2-World/Places"
-WHERE contains(MyContainer, this.file.link)
-  AND MyCategory = "Government"
-SORT file.name ASC
-```
-
-
